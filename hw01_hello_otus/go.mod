@@ -1,4 +1,4 @@
-module github.com/CoooLLer/home_work
+module github.com/CoooLLer/home_work/hw01_hello_otus
 
 go 1.16
 
