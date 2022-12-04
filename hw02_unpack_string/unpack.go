@@ -11,34 +11,40 @@ var ErrInvalidString = errors.New("invalid string")
 
 func Unpack(str string) (string, error) {
 	var builder strings.Builder
-	skipNextChar := false
-	runes := []rune(str)
+	var previousChar rune
 
-	for pos, char := range runes {
-		if skipNextChar {
-			skipNextChar = false
+	for pos, char := range str {
+		if pos == 0 {
+			if unicode.IsDigit(char) {
+				return "", ErrInvalidString
+			}
+			previousChar = char
 			continue
 		}
 
 		if unicode.IsDigit(char) {
-			return "", ErrInvalidString
-		}
-
-		if pos+1 < len(runes) {
-			if unicode.IsDigit(runes[pos+1]) {
-				i, err := strconv.Atoi(string(runes[pos+1]))
-				if err != nil {
-					panic(err)
-				}
-				builder.WriteString(strings.Repeat(string(char), i))
-
-				skipNextChar = true
-
-				continue
+			if unicode.IsDigit(previousChar) {
+				return "", ErrInvalidString
 			}
+			repeatCount, err := strconv.Atoi(string(char))
+			if err != nil {
+				return "", ErrInvalidString
+			}
+
+			builder.WriteString(strings.Repeat(string(previousChar), repeatCount))
+			previousChar = char
+			continue
 		}
 
-		builder.WriteString(string(char))
+		if !unicode.IsDigit(previousChar) {
+			builder.WriteString(string(previousChar))
+		}
+
+		previousChar = char
+
+		if pos+1 == len(str) {
+			builder.WriteString(string(char))
+		}
 	}
 
 	return builder.String(), nil
