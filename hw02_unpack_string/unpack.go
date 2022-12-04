@@ -7,6 +7,8 @@ import (
 	"unicode"
 )
 
+const EmptyRune = '\000'
+
 var ErrInvalidString = errors.New("invalid string")
 
 func Unpack(str string) (string, error) {
@@ -37,14 +39,14 @@ func Unpack(str string) (string, error) {
 		}
 
 		if !unicode.IsDigit(previousChar) {
-			builder.WriteString(string(previousChar))
+			builder.WriteRune(previousChar)
 		}
 
 		previousChar = char
+	}
 
-		if pos+1 == len(str) {
-			builder.WriteString(string(char))
-		}
+	if !unicode.IsDigit(previousChar) && previousChar != EmptyRune {
+		builder.WriteRune(previousChar)
 	}
 
 	return builder.String(), nil
