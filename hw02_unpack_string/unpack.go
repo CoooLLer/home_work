@@ -25,9 +25,8 @@ func Unpack(str string) (string, error) {
 		}
 
 		if pos+1 < len(runes) {
-			nextChar := rune(runes[pos+1])
-			if unicode.IsDigit(nextChar) {
-				i, err := strconv.Atoi(string(nextChar))
+			if unicode.IsDigit(runes[pos+1]) {
+				i, err := strconv.Atoi(string(runes[pos+1]))
 				if err != nil {
 					panic(err)
 				}
