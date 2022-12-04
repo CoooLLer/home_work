@@ -5,6 +5,8 @@ import (
 	"strings"
 )
 
+const TopCount = 10
+
 type entry struct {
 	count int
 	word  string
@@ -22,10 +24,12 @@ func Top10(str string) []string {
 		}
 	}
 
-	var topSlice []entry
+	topSlice := make([]entry, len(top))
 
+	index := 0
 	for word, count := range top {
-		topSlice = append(topSlice, entry{count, word})
+		topSlice[index] = entry{count, word}
+		index++
 	}
 
 	sort.Slice(topSlice, func(i, j int) bool {
@@ -35,14 +39,14 @@ func Top10(str string) []string {
 		return topSlice[i].count > topSlice[j].count
 	})
 
-	if len(topSlice) > 10 {
-		topSlice = topSlice[:10]
+	if len(topSlice) > TopCount {
+		topSlice = topSlice[:TopCount]
 	}
 
-	var result []string
+	result := make([]string, len(topSlice))
 
-	for _, entry := range topSlice {
-		result = append(result, entry.word)
+	for pos, entry := range topSlice {
+		result[pos] = entry.word
 	}
 
 	return result
