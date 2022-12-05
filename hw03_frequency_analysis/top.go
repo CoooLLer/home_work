@@ -7,7 +7,7 @@ import (
 
 const TopCount = 10
 
-type entry struct {
+type topEntry struct {
 	count int
 	word  string
 }
@@ -17,19 +17,13 @@ func Top10(str string) []string {
 	top := map[string]int{}
 
 	for _, word := range slice {
-		if _, isSet := top[word]; !isSet {
-			top[word] = 1
-		} else {
-			top[word]++
-		}
+		top[word]++
 	}
 
-	topSlice := make([]entry, len(top))
+	topSlice := make([]topEntry, 0, len(top))
 
-	index := 0
 	for word, count := range top {
-		topSlice[index] = entry{count, word}
-		index++
+		topSlice = append(topSlice, topEntry{count, word})
 	}
 
 	sort.Slice(topSlice, func(i, j int) bool {
@@ -43,10 +37,10 @@ func Top10(str string) []string {
 		topSlice = topSlice[:TopCount]
 	}
 
-	result := make([]string, len(topSlice))
+	result := make([]string, 0, cap(topSlice))
 
-	for pos, entry := range topSlice {
-		result[pos] = entry.word
+	for _, entry := range topSlice {
+		result = append(result, entry.word)
 	}
 
 	return result
