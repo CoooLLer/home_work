@@ -8,8 +8,6 @@ type Cache interface {
 	Set(key Key, value interface{}) bool
 	Get(key Key) (interface{}, bool)
 	Clear()
-	LastInQueue() *ListItem
-	Queue() List
 }
 
 type lruCache struct {
@@ -70,14 +68,6 @@ func (lc *lruCache) Clear() {
 
 	lc.queue = NewList()
 	lc.items = make(map[Key]*ListItem, lc.capacity)
-}
-
-func (lc *lruCache) LastInQueue() *ListItem {
-	return lc.queue.Back()
-}
-
-func (lc *lruCache) Queue() List {
-	return lc.queue
 }
 
 func NewCache(capacity int) Cache {
