@@ -110,7 +110,6 @@ func TestPipeline(t *testing.T) {
 				default:
 					in <- v
 				}
-
 			}
 			close(in)
 		}()
