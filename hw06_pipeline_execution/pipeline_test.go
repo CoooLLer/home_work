@@ -103,6 +103,7 @@ func TestPipeline(t *testing.T) {
 		}()
 
 		go func() {
+			defer close(in)
 			for v := 1; v > 0; v++ {
 				select {
 				case <-done:
@@ -111,7 +112,6 @@ func TestPipeline(t *testing.T) {
 					in <- v
 				}
 			}
-			close(in)
 		}()
 
 		result := make([]string, 0, 10)
