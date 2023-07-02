@@ -90,4 +90,39 @@ func TestPipeline(t *testing.T) {
 		require.Len(t, result, 0)
 		require.Less(t, int64(elapsed), int64(abortDur)+int64(fault))
 	})
+
+	t.Run("infinite data with done case", func(t *testing.T) {
+		in := make(Bi)
+		done := make(Bi)
+
+		// Abort after 2000ms
+		abortDur := sleepPerStage * 20
+		go func() {
+			<-time.After(abortDur)
+			close(done)
+		}()
+
+		go func() {
+			for v := 1; v > 0; v++ {
+				select {
+				case <-done:
+					return
+				default:
+					in <- v
+				}
+
+			}
+			close(in)
+		}()
+
+		result := make([]string, 0, 10)
+		start := time.Now()
+		for s := range ExecutePipeline(in, done, stages...) {
+			result = append(result, s.(string))
+		}
+		elapsed := time.Since(start)
+
+		require.Greater(t, len(result), 10)
+		require.Less(t, int64(elapsed), int64(abortDur)+int64(fault))
+	})
 }
