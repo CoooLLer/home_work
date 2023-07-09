@@ -15,7 +15,6 @@ var (
 )
 
 func Copy(fromPath, toPath string, offset, limit int64) error {
-
 	inputFile, err := os.Open(fromPath)
 	if err != nil {
 		return err
@@ -73,7 +72,7 @@ func process(in io.Reader, out io.Writer, limit int64) error {
 	reader := bar.NewProxyReader(in)
 
 	_, err := io.CopyN(out, reader, limit)
-	if err != nil && err != io.EOF {
+	if err != nil && !errors.Is(err, io.EOF) {
 		return err
 	}
 	bar.Finish()

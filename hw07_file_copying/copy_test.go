@@ -67,10 +67,10 @@ func TestSuccessCopy(t *testing.T) {
 		content, _ := os.ReadFile(out.Name())
 		require.Equal(t, "cont", string(content))
 	})
-
 }
 
 func createTemp(t *testing.T, content string) *os.File {
+	t.Helper()
 	f, err := os.CreateTemp("", "example.*.txt")
 	if err != nil {
 		t.Fatal(err)
@@ -88,6 +88,7 @@ func createTemp(t *testing.T, content string) *os.File {
 }
 
 func cleanFiles(t *testing.T) {
+	t.Helper()
 	for _, file := range tempFiles {
 		err := file.Close()
 		if err != nil {
