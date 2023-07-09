@@ -1,7 +1,103 @@
 package main
 
-import "testing"
+import (
+	"os"
+	"testing"
 
-func TestCopy(t *testing.T) {
-	// Place your code here.
+	"github.com/stretchr/testify/require"
+)
+
+var tempFiles []*os.File
+
+func TestFailCopy(t *testing.T) {
+	defer cleanFiles(t)
+
+	t.Run("Unsupported file", func(t *testing.T) {
+		err := Copy("/dev/urandom", "", 0, 0)
+		require.Equal(t, ErrUnsupportedFile, err)
+	})
+
+	t.Run("Nonexistent file", func(t *testing.T) {
+		err := Copy("nonexistent.file", "", 0, 0)
+		require.NotNil(t, err)
+	})
+
+	t.Run("Offset larger than file size", func(t *testing.T) {
+		in := createTemp(t, "")
+		err := Copy(in.Name(), "", 5, 0)
+		require.Equal(t, ErrOffsetExceedsFileSize, err)
+	})
+}
+
+func TestSuccessCopy(t *testing.T) {
+	defer cleanFiles(t)
+
+	t.Run("Simple copy", func(t *testing.T) {
+		in := createTemp(t, "test content")
+		out := createTemp(t, "")
+		err := Copy(in.Name(), out.Name(), 0, 0)
+		require.Nil(t, err)
+		content, _ := os.ReadFile(out.Name())
+		require.Equal(t, "test content", string(content))
+	})
+
+	t.Run("Offset copy", func(t *testing.T) {
+		in := createTemp(t, "test content")
+		out := createTemp(t, "")
+		err := Copy(in.Name(), out.Name(), 5, 0)
+		require.Nil(t, err)
+		content, _ := os.ReadFile(out.Name())
+		require.Equal(t, "content", string(content))
+	})
+
+	t.Run("Limit copy", func(t *testing.T) {
+		in := createTemp(t, "test content")
+		out := createTemp(t, "")
+		err := Copy(in.Name(), out.Name(), 0, 4)
+		require.Nil(t, err)
+		content, _ := os.ReadFile(out.Name())
+		require.Equal(t, "test", string(content))
+	})
+
+	t.Run("Offset limit copy", func(t *testing.T) {
+		in := createTemp(t, "test content")
+		out := createTemp(t, "")
+		err := Copy(in.Name(), out.Name(), 5, 4)
+		require.Nil(t, err)
+		content, _ := os.ReadFile(out.Name())
+		require.Equal(t, "cont", string(content))
+	})
+
+}
+
+func createTemp(t *testing.T, content string) *os.File {
+	f, err := os.CreateTemp("", "example.*.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(content) > 0 {
+		if _, err := f.Write([]byte(content)); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	tempFiles = append(tempFiles, f)
+
+	return f
+}
+
+func cleanFiles(t *testing.T) {
+	for _, file := range tempFiles {
+		err := file.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+		err = os.Remove(file.Name())
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	tempFiles = []*os.File{}
 }
