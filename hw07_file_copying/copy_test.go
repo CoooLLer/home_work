@@ -44,9 +44,7 @@ func TestSuccessCopy(t *testing.T) {
 		err := Copy(in.Name(), out.Name(), 0, 0)
 		require.NoError(t, err)
 		content, err := os.ReadFile(out.Name())
-		if err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(t, err)
 		require.Equal(t, "test content", string(content))
 	})
 
@@ -56,9 +54,7 @@ func TestSuccessCopy(t *testing.T) {
 		err := Copy(in.Name(), out.Name(), 5, 0)
 		require.NoError(t, err)
 		content, err := os.ReadFile(out.Name())
-		if err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(t, err)
 		require.Equal(t, "content", string(content))
 	})
 
@@ -68,9 +64,7 @@ func TestSuccessCopy(t *testing.T) {
 		err := Copy(in.Name(), out.Name(), 0, 4)
 		require.NoError(t, err)
 		content, err := os.ReadFile(out.Name())
-		if err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(t, err)
 		require.Equal(t, "test", string(content))
 	})
 
@@ -80,9 +74,7 @@ func TestSuccessCopy(t *testing.T) {
 		err := Copy(in.Name(), out.Name(), 5, 4)
 		require.NoError(t, err)
 		content, err := os.ReadFile(out.Name())
-		if err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(t, err)
 		require.Equal(t, "cont", string(content))
 	})
 }
