@@ -12,6 +12,7 @@ import (
 var (
 	ErrUnsupportedFile       = errors.New("unsupported file")
 	ErrOffsetExceedsFileSize = errors.New("offset exceeds file size")
+	ErrSameFile              = errors.New("input and output files are the same")
 )
 
 func Copy(fromPath, toPath string, offset, limit int64) error {
@@ -19,17 +20,23 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	if err != nil {
 		return err
 	}
+	defer func() {
+		err := inputFile.Close()
+		if err != nil {
+			return
+		}
+	}()
 
-	fileInfo, err := inputFile.Stat()
+	inputFileInfo, err := inputFile.Stat()
 	if err != nil {
 		return err
 	}
 
-	if !fileInfo.Mode().IsRegular() {
+	if !inputFileInfo.Mode().IsRegular() {
 		return ErrUnsupportedFile
 	}
 
-	if fileInfo.Size() < offset {
+	if inputFileInfo.Size() < offset {
 		return ErrOffsetExceedsFileSize
 	}
 
@@ -39,18 +46,23 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	}
 
 	defer func() {
-		err := inputFile.Close()
-		if err != nil {
-			return
-		}
 		err = outFile.Close()
 		if err != nil {
 			return
 		}
 	}()
 
+	outFileInfo, err := outFile.Stat()
+	if err != nil {
+		return err
+	}
+
+	if os.SameFile(inputFileInfo, outFileInfo) {
+		return ErrSameFile
+	}
+
 	if limit == 0 {
-		limit = fileInfo.Size()
+		limit = inputFileInfo.Size()
 	}
 
 	if offset > 0 {
@@ -65,6 +77,9 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 
 func process(in io.Reader, out io.Writer, limit int64) error {
 	bar := pb.New(int(limit)).SetUnits(pb.U_BYTES).SetRefreshRate(time.Millisecond * 10)
+
+	defer bar.Finish()
+
 	bar.ShowSpeed = true
 
 	bar.Start()
@@ -75,7 +90,6 @@ func process(in io.Reader, out io.Writer, limit int64) error {
 	if err != nil && !errors.Is(err, io.EOF) {
 		return err
 	}
-	bar.Finish()
 
 	return nil
 }

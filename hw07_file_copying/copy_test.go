@@ -19,7 +19,7 @@ func TestFailCopy(t *testing.T) {
 
 	t.Run("Nonexistent file", func(t *testing.T) {
 		err := Copy("nonexistent.file", "", 0, 0)
-		require.NotNil(t, err)
+		require.Error(t, err)
 	})
 
 	t.Run("Offset larger than file size", func(t *testing.T) {
@@ -36,8 +36,11 @@ func TestSuccessCopy(t *testing.T) {
 		in := createTemp(t, "test content")
 		out := createTemp(t, "")
 		err := Copy(in.Name(), out.Name(), 0, 0)
-		require.Nil(t, err)
-		content, _ := os.ReadFile(out.Name())
+		require.NoError(t, err)
+		content, err := os.ReadFile(out.Name())
+		if err != nil {
+			t.Fatal(err)
+		}
 		require.Equal(t, "test content", string(content))
 	})
 
@@ -45,8 +48,11 @@ func TestSuccessCopy(t *testing.T) {
 		in := createTemp(t, "test content")
 		out := createTemp(t, "")
 		err := Copy(in.Name(), out.Name(), 5, 0)
-		require.Nil(t, err)
-		content, _ := os.ReadFile(out.Name())
+		require.NoError(t, err)
+		content, err := os.ReadFile(out.Name())
+		if err != nil {
+			t.Fatal(err)
+		}
 		require.Equal(t, "content", string(content))
 	})
 
@@ -54,8 +60,11 @@ func TestSuccessCopy(t *testing.T) {
 		in := createTemp(t, "test content")
 		out := createTemp(t, "")
 		err := Copy(in.Name(), out.Name(), 0, 4)
-		require.Nil(t, err)
-		content, _ := os.ReadFile(out.Name())
+		require.NoError(t, err)
+		content, err := os.ReadFile(out.Name())
+		if err != nil {
+			t.Fatal(err)
+		}
 		require.Equal(t, "test", string(content))
 	})
 
@@ -63,8 +72,11 @@ func TestSuccessCopy(t *testing.T) {
 		in := createTemp(t, "test content")
 		out := createTemp(t, "")
 		err := Copy(in.Name(), out.Name(), 5, 4)
-		require.Nil(t, err)
-		content, _ := os.ReadFile(out.Name())
+		require.NoError(t, err)
+		content, err := os.ReadFile(out.Name())
+		if err != nil {
+			t.Fatal(err)
+		}
 		require.Equal(t, "cont", string(content))
 	})
 }
