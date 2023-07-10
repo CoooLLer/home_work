@@ -40,6 +40,15 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 		return ErrOffsetExceedsFileSize
 	}
 
+	outFileInfo, err := os.Stat(toPath)
+	if err != nil {
+		return err
+	}
+
+	if os.SameFile(inputFileInfo, outFileInfo) {
+		return ErrSameFile
+	}
+
 	outFile, err := os.Create(toPath)
 	if err != nil {
 		return err
@@ -51,15 +60,6 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 			return
 		}
 	}()
-
-	outFileInfo, err := outFile.Stat()
-	if err != nil {
-		return err
-	}
-
-	if os.SameFile(inputFileInfo, outFileInfo) {
-		return ErrSameFile
-	}
 
 	if limit == 0 {
 		limit = inputFileInfo.Size()
