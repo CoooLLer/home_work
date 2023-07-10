@@ -27,6 +27,12 @@ func TestFailCopy(t *testing.T) {
 		err := Copy(in.Name(), "", 5, 0)
 		require.Equal(t, ErrOffsetExceedsFileSize, err)
 	})
+
+	t.Run("Same file", func(t *testing.T) {
+		in := createTemp(t, "")
+		err := Copy(in.Name(), in.Name(), 0, 0)
+		require.Equal(t, ErrSameFile, err)
+	})
 }
 
 func TestSuccessCopy(t *testing.T) {
