@@ -41,7 +41,7 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	}
 
 	outFileInfo, err := os.Stat(toPath)
-	if err != nil {
+	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
 
